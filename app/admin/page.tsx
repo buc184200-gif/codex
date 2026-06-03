@@ -1,8 +1,8 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Edit3, Package, Plus, RotateCcw, Save, ShoppingBag, Trash2, Truck } from "lucide-react";
+import { Edit3, ImagePlus, LockKeyhole, LogOut, Package, Plus, RotateCcw, Save, ShoppingBag, Trash2, Truck, X } from "lucide-react";
 import { Button } from "@/components/Button";
 import { ProductImage } from "@/components/ProductImage";
 import { money } from "@/lib/utils";
@@ -13,6 +13,7 @@ import { useToast } from "@/store/toast-store";
 import { OrderStatus, Product, ProductCategory } from "@/types";
 
 const statuses: OrderStatus[] = ["Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"];
+const adminSecret = "1979";
 
 const blankProduct = (): Product => ({
   ...seedProducts[0],
@@ -45,6 +46,12 @@ export default function AdminPage() {
   const [tab, setTab] = useState<"products" | "orders">("products");
   const [draft, setDraft] = useState<Product>(blankProduct());
   const [editing, setEditing] = useState(false);
+  const [authorized, setAuthorized] = useState(false);
+  const [secret, setSecret] = useState("");
+
+  useEffect(() => {
+    setAuthorized(window.sessionStorage.getItem("mn-admin-authorized") === "true");
+  }, []);
 
   const revenue = orders.filter((order) => order.status !== "Cancelled").reduce((sum, order) => sum + order.total, 0);
   const pending = orders.filter((order) => order.status === "Pending").length;
@@ -86,6 +93,95 @@ export default function AdminPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const unlockAdmin = (event: FormEvent) => {
+    event.preventDefault();
+    if (secret.trim() !== adminSecret) {
+      push("Invalid admin code", "error");
+      return;
+    }
+    window.sessionStorage.setItem("mn-admin-authorized", "true");
+    setAuthorized(true);
+    setSecret("");
+    push("Admin access unlocked");
+  };
+
+  const logoutAdmin = () => {
+    window.sessionStorage.removeItem("mn-admin-authorized");
+    setAuthorized(false);
+    push("Admin access locked", "info");
+  };
+
+  const uploadImages = async (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []).filter((file) => file.type.startsWith("image/"));
+    if (files.length === 0) return;
+    const oversized = files.find((file) => file.size > 2 * 1024 * 1024);
+    if (oversized) {
+      push("Each image must be under 2 MB", "error");
+      event.target.value = "";
+      return;
+    }
+    const uploaded = await Promise.all(
+      files.slice(0, 4).map(
+        (file) =>
+          new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result));
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(file);
+          })
+      )
+    );
+    setDraft((current) => ({
+      ...current,
+      images: [...uploaded, ...current.images.filter((image) => !image.startsWith("data:image/"))].slice(0, 4)
+    }));
+    push("Product image uploaded");
+    event.target.value = "";
+  };
+
+  const removeImage = (image: string) => {
+    setDraft((current) => {
+      const nextImages = current.images.filter((item) => item !== image);
+      return { ...current, images: nextImages.length > 0 ? nextImages : ["front", "back", "fabric"] };
+    });
+  };
+
+  if (!authorized) {
+    return (
+      <section className="container-pad grid min-h-[calc(100vh-220px)] place-items-center py-12">
+        <motion.form
+          onSubmit={unlockAdmin}
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          className="w-full max-w-md border border-black/10 bg-ink p-7 text-bone shadow-soft"
+        >
+          <div className="mb-6 grid h-12 w-12 place-items-center rounded-full bg-bone text-ink">
+            <LockKeyhole className="h-5 w-5" />
+          </div>
+          <p className="mb-3 text-sm text-sand">Admin access</p>
+          <h1 className="font-display text-4xl">Enter secret code</h1>
+          <p className="mt-3 text-sm leading-6 text-bone/68">
+            Dashboard controls are locked for visitors. Only admins with the code can manage products and orders.
+          </p>
+          <label className="mt-7 block">
+            <span className="text-sm text-bone/72">Secret code</span>
+            <input
+              type="password"
+              value={secret}
+              onChange={(event) => setSecret(event.target.value)}
+              className="focus-ring mt-2 h-12 w-full rounded-full border border-white/10 bg-white/10 px-4 text-bone"
+              placeholder="Enter code"
+            />
+          </label>
+          <Button type="submit" variant="light" className="mt-6 w-full">
+            Unlock dashboard
+          </Button>
+        </motion.form>
+      </section>
+    );
+  }
+
   return (
     <section className="container-pad py-12">
       <div className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
@@ -96,6 +192,9 @@ export default function AdminPage() {
         <div className="inline-flex rounded-full border border-black/10 bg-white/70 p-1">
           <button onClick={() => setTab("products")} className={tab === "products" ? "rounded-full bg-ink px-5 py-2 text-sm text-bone" : "px-5 py-2 text-sm"}>Products</button>
           <button onClick={() => setTab("orders")} className={tab === "orders" ? "rounded-full bg-ink px-5 py-2 text-sm text-bone" : "px-5 py-2 text-sm"}>Orders</button>
+          <button onClick={logoutAdmin} className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm text-red-700">
+            <LogOut className="h-4 w-4" /> Lock
+          </button>
         </div>
       </div>
 
@@ -140,6 +239,34 @@ export default function AdminPage() {
             <AdminField label="Sizes" value={draft.sizes.join(", ")} onChange={(value) => setDraft({ ...draft, sizes: value.split(",").map((item) => item.trim()) })} />
             <AdminField label="Colors" value={draft.colors.join(", ")} onChange={(value) => setDraft({ ...draft, colors: value.split(",").map((item) => item.trim()) })} />
             <AdminField label="Fabric" value={draft.fabric} onChange={(value) => setDraft({ ...draft, fabric: value })} />
+            <div className="mt-4">
+              <span className="text-sm text-bone/72">Product images</span>
+              <label className="mt-2 flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-white/20 bg-white/10 px-4 py-5 text-center transition hover:bg-white/15">
+                <ImagePlus className="mb-2 h-6 w-6 text-sand" />
+                <span className="text-sm">Upload image</span>
+                <span className="mt-1 text-xs text-bone/50">PNG, JPG or WEBP under 2 MB</span>
+                <input type="file" accept="image/*" multiple onChange={uploadImages} className="sr-only" />
+              </label>
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                {draft.images.map((image) => (
+                  <div key={image} className="relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-white/10">
+                    {image.startsWith("data:image/") ? (
+                      <img src={image} alt="Uploaded product preview" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="grid h-full place-items-center text-xs text-bone/60">{image}</div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeImage(image)}
+                      className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-ink/80 text-bone"
+                      aria-label="Remove image"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
             <label className="mt-4 block">
               <span className="text-sm text-bone/72">Description</span>
               <textarea value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} className="focus-ring mt-2 min-h-24 w-full rounded-3xl border border-white/10 bg-white/10 px-4 py-3" />
