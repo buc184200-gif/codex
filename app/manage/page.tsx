@@ -96,19 +96,19 @@ export default function AdminPage() {
   const unlockAdmin = (event: FormEvent) => {
     event.preventDefault();
     if (secret.trim() !== adminSecret) {
-      push("Invalid admin code", "error");
+      push("Invalid private code", "error");
       return;
     }
     window.sessionStorage.setItem("mn-admin-authorized", "true");
     setAuthorized(true);
     setSecret("");
-    push("Admin access unlocked");
+    push("Private access unlocked");
   };
 
   const logoutAdmin = () => {
     window.sessionStorage.removeItem("mn-admin-authorized");
     setAuthorized(false);
-    push("Admin access locked", "info");
+    push("Private access locked", "info");
   };
 
   const uploadImages = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -159,10 +159,10 @@ export default function AdminPage() {
           <div className="mb-6 grid h-12 w-12 place-items-center rounded-full bg-bone text-ink">
             <LockKeyhole className="h-5 w-5" />
           </div>
-          <p className="mb-3 text-sm text-sand">Admin access</p>
+          <p className="mb-3 text-sm text-sand">Private access</p>
           <h1 className="font-display text-4xl">Enter secret code</h1>
           <p className="mt-3 text-sm leading-6 text-bone/68">
-            Dashboard controls are locked for visitors. Only admins with the code can manage products and orders.
+            Dashboard controls are locked for visitors. Only the store owner with the code can manage products and orders.
           </p>
           <label className="mt-7 block">
             <span className="text-sm text-bone/72">Secret code</span>
@@ -186,7 +186,7 @@ export default function AdminPage() {
     <section className="container-pad py-12">
       <div className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
-          <p className="mb-3 text-sm text-gilt">Admin</p>
+          <p className="mb-3 text-sm text-gilt">Private</p>
           <h1 className="font-display text-5xl">Dashboard</h1>
         </div>
         <div className="inline-flex rounded-full border border-black/10 bg-white/70 p-1">

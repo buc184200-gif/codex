@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Admin Access",
+  title: "Private Access",
   robots: {
     index: false,
     follow: false,
@@ -9,6 +9,6 @@ export const metadata: Metadata = {
   }
 };
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function ManageLayout({ children }: { children: React.ReactNode }) {
   return children;
 }
