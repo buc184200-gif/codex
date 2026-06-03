@@ -8,9 +8,9 @@ import { Button } from "@/components/Button";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductImage } from "@/components/ProductImage";
 import { Section } from "@/components/Section";
+import { PageTransition, Stagger } from "@/components/Motion";
 import { useProducts } from "@/store/product-store";
-
-const ease = [0.22, 1, 0.36, 1] as const;
+import { fadeUp, premiumEase, staggerContainer } from "@/lib/animations";
 
 export default function HomePage() {
   const { products } = useProducts();
@@ -19,22 +19,28 @@ export default function HomePage() {
   const sellers = [...products].sort((a, b) => b.popularity - a.popularity).slice(0, 4);
 
   return (
-    <>
+    <PageTransition>
       <section className="relative overflow-hidden bg-ink text-bone">
+        <motion.div
+          aria-hidden
+          className="absolute left-[-12%] top-[-28%] h-[560px] w-[560px] rounded-full bg-sand/18 blur-3xl"
+          animate={{ x: [0, 64, 0], y: [0, 34, 0], opacity: [0.42, 0.68, 0.42] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        />
         <div className="absolute inset-0 opacity-42">
           <Image src="/hero-atelier.png" alt="Maison Noir premium product studio" fill priority className="object-cover object-center" />
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/82 to-ink/20" />
         <div className="container-pad relative grid min-h-[calc(100vh-80px)] items-center gap-12 py-16 lg:grid-cols-[0.95fr_1fr]">
-          <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.75, ease }}>
-            <p className="mb-5 text-sm text-sand">Premium cotton essentials, delivered COD</p>
-            <h1 className="font-display text-5xl leading-[1.02] sm:text-6xl lg:text-7xl">
+          <motion.div variants={staggerContainer} initial="hidden" animate="show">
+            <motion.p variants={fadeUp} className="mb-5 text-sm text-sand">Premium cotton essentials, delivered COD</motion.p>
+            <motion.h1 variants={fadeUp} className="font-display text-5xl leading-[1.02] sm:text-6xl lg:text-7xl">
               Maison Noir
-            </h1>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-bone/76">
+            </motion.h1>
+            <motion.p variants={fadeUp} className="mt-6 max-w-xl text-lg leading-8 text-bone/76">
               Luxury streetwear T-shirts, shirts and overshirts cut in refined neutrals, dense cotton and calm silhouettes.
-            </p>
-            <div className="mt-9 flex flex-wrap gap-4">
+            </motion.p>
+            <motion.div variants={fadeUp} className="mt-9 flex flex-wrap gap-4">
               <Link href="/products">
                 <Button variant="light">
                   Shop collection <ArrowRight className="h-4 w-4" />
@@ -45,15 +51,23 @@ export default function HomePage() {
                   New arrivals
                 </Button>
               </Link>
-            </div>
+            </motion.div>
           </motion.div>
           <div className="hidden min-h-[520px] lg:block">
             {featured.slice(0, 3).map((product, index) => (
               <motion.div
                 key={product.id}
                 initial={{ opacity: 0, y: 30, rotate: 0 }}
-                animate={{ opacity: 1, y: 0, rotate: index === 1 ? 4 : -3 }}
-                transition={{ delay: 0.2 + index * 0.12, duration: 0.62, ease }}
+                animate={{
+                  opacity: 1,
+                  y: [0, index === 1 ? -18 : -10, 0],
+                  rotate: index === 1 ? [4, 6, 4] : [-3, -5, -3]
+                }}
+                transition={{
+                  opacity: { delay: 0.2 + index * 0.12, duration: 0.62, ease: premiumEase },
+                  y: { duration: 6 + index, repeat: Infinity, ease: "easeInOut" },
+                  rotate: { duration: 7 + index, repeat: Infinity, ease: "easeInOut" }
+                }}
                 className="absolute"
                 style={{
                   right: `${index * 13 + 4}%`,
@@ -69,21 +83,21 @@ export default function HomePage() {
       </section>
 
       <Section eyebrow="Featured" title="Tailored for daily rotation">
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <Stagger className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {featured.map((product) => <ProductCard key={product.id} product={product} />)}
-        </div>
+        </Stagger>
       </Section>
 
       <Section eyebrow="New arrivals" title="Just landed">
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <Stagger className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {arrivals.map((product) => <ProductCard key={product.id} product={product} />)}
-        </div>
+        </Stagger>
       </Section>
 
       <Section dark eyebrow="Best sellers" title="The pieces clients keep coming back for">
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <Stagger className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {sellers.map((product) => <ProductCard key={product.id} product={product} />)}
-        </div>
+        </Stagger>
       </Section>
 
       <Section eyebrow="Benefits" title="Built like a premium wardrobe service">
@@ -156,6 +170,6 @@ export default function HomePage() {
           <Button>Build your wardrobe</Button>
         </Link>
       </section>
-    </>
+    </PageTransition>
   );
 }

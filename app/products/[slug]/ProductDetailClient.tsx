@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Minus, Plus, ShieldCheck, ShoppingBag, Star } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/Button";
@@ -11,6 +11,8 @@ import { money } from "@/lib/utils";
 import { useCart } from "@/store/cart-store";
 import { useProducts } from "@/store/product-store";
 import { useToast } from "@/store/toast-store";
+import { PageTransition, Reveal } from "@/components/Motion";
+import { fadeUp, premiumEase, staggerContainer } from "@/lib/animations";
 
 export function ProductDetailClient({ slug }: { slug: string }) {
   const { products } = useProducts();
@@ -54,31 +56,48 @@ export function ProductDetailClient({ slug }: { slug: string }) {
   };
 
   return (
-    <section className="container-pad py-12">
+    <PageTransition className="container-pad py-12">
       <div className="grid gap-10 lg:grid-cols-[1.05fr_.95fr]">
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
-          <ProductImage product={product} imageIndex={imageIndex} className="aspect-[4/5] w-full" />
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: premiumEase }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={imageIndex}
+              initial={{ opacity: 0, scale: 0.985 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.015 }}
+              transition={{ duration: 0.34, ease: premiumEase }}
+            >
+              <ProductImage product={product} imageIndex={imageIndex} className="aspect-[4/5] w-full" />
+            </motion.div>
+          </AnimatePresence>
           <div className="mt-4 grid grid-cols-3 gap-3">
             {product.images.map((image, index) => (
-              <button key={image} type="button" onClick={() => setImageIndex(index)} className={index === imageIndex ? "border-2 border-ink" : "border border-black/10"}>
+              <motion.button
+                key={image}
+                type="button"
+                onClick={() => setImageIndex(index)}
+                whileHover={{ y: -4, scale: 1.02 }}
+                whileTap={{ scale: 0.96 }}
+                className={index === imageIndex ? "border-2 border-ink" : "border border-black/10"}
+              >
                 <ProductImage product={product} imageIndex={index} className="aspect-square" />
-              </button>
+              </motion.button>
             ))}
           </div>
         </motion.div>
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className="lg:sticky lg:top-28 lg:self-start">
-          <p className="mb-3 text-sm text-gilt">{product.category}</p>
-          <h1 className="font-display text-5xl leading-tight">{product.name}</h1>
-          <div className="mt-4 flex items-center gap-3">
+        <motion.div variants={staggerContainer} initial="hidden" animate="show" className="lg:sticky lg:top-28 lg:self-start">
+          <motion.p variants={fadeUp} className="mb-3 text-sm text-gilt">{product.category}</motion.p>
+          <motion.h1 variants={fadeUp} className="font-display text-5xl leading-tight">{product.name}</motion.h1>
+          <motion.div variants={fadeUp} className="mt-4 flex items-center gap-3">
             <span className="text-2xl font-semibold">{money(product.price)}</span>
             <span className="text-sm text-smoke line-through">{money(product.originalPrice)}</span>
             <span className="rounded-full bg-ink px-3 py-1 text-xs text-bone">{product.discount}% off</span>
-          </div>
-          <div className="mt-4 flex items-center gap-2 text-sm text-smoke">
+          </motion.div>
+          <motion.div variants={fadeUp} className="mt-4 flex items-center gap-2 text-sm text-smoke">
             <Star className="h-4 w-4 fill-gilt text-gilt" /> {product.rating} rating from {product.reviews} reviews
-          </div>
-          <p className="mt-6 leading-7 text-smoke">{product.description}</p>
-          <p className="mt-3 text-sm text-smoke"><span className="text-ink">Fabric:</span> {product.fabric}</p>
+          </motion.div>
+          <motion.p variants={fadeUp} className="mt-6 leading-7 text-smoke">{product.description}</motion.p>
+          <motion.p variants={fadeUp} className="mt-3 text-sm text-smoke"><span className="text-ink">Fabric:</span> {product.fabric}</motion.p>
 
           <Selector label="Size" options={product.sizes} value={selectedSize} onChange={setSize} />
           <Selector label="Color" options={product.colors} value={selectedColor} onChange={setColor} />
@@ -92,24 +111,26 @@ export function ProductDetailClient({ slug }: { slug: string }) {
             </div>
           </div>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <motion.div variants={fadeUp} className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button onClick={add} disabled={product.stock <= 0} className="sm:flex-1">
               <ShoppingBag className="h-4 w-4" /> {product.stock > 0 ? "Add to cart" : "Sold out"}
             </Button>
-            <Link href="/checkout" className="inline-flex min-h-12 items-center justify-center rounded-full border border-black/15 px-6 text-sm">Checkout</Link>
-          </div>
-          <div className="mt-7 flex items-center gap-3 border border-black/10 bg-white/54 p-4 text-sm text-smoke">
+            <motion.div whileHover={{ y: -3, boxShadow: "0 20px 54px rgba(0,0,0,0.12)" }} whileTap={{ scale: 0.97 }} className="sm:flex-1">
+              <Link href="/checkout" className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-black/15 px-6 text-sm">Buy now</Link>
+            </motion.div>
+          </motion.div>
+          <motion.div variants={fadeUp} className="mt-7 flex items-center gap-3 border border-black/10 bg-white/54 p-4 text-sm text-smoke">
             <ShieldCheck className="h-5 w-5 text-gilt" /> Cash on Delivery, easy returns and premium packaging included.
-          </div>
+          </motion.div>
         </motion.div>
       </div>
       {related.length > 0 && (
-        <div className="mt-20">
+        <Reveal className="mt-20">
           <h2 className="font-display text-4xl">Complete the rotation</h2>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{related.map((item) => <ProductCard key={item.id} product={item} />)}</div>
-        </div>
+        </Reveal>
       )}
-    </section>
+    </PageTransition>
   );
 }
 
@@ -119,9 +140,9 @@ function Selector({ label, options, value, onChange }: { label: string; options:
       <p className="mb-3 text-sm text-smoke">{label}</p>
       <div className="flex flex-wrap gap-2">
         {options.map((option) => (
-          <button key={option} onClick={() => onChange(option)} className={value === option ? "min-h-11 rounded-full bg-ink px-5 text-sm text-bone" : "min-h-11 rounded-full border border-black/10 bg-white/60 px-5 text-sm"}>
+          <motion.button key={option} whileHover={{ y: -2, scale: 1.03 }} whileTap={{ scale: 0.95 }} onClick={() => onChange(option)} className={value === option ? "min-h-11 rounded-full bg-ink px-5 text-sm text-bone shadow-glow" : "min-h-11 rounded-full border border-black/10 bg-white/60 px-5 text-sm"}>
             {option}
-          </button>
+          </motion.button>
         ))}
       </div>
     </div>

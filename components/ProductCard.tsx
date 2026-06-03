@@ -10,8 +10,10 @@ import { ProductImage } from "@/components/ProductImage";
 import { useCart } from "@/store/cart-store";
 import { useToast } from "@/store/toast-store";
 import { QuickViewModal } from "@/components/QuickViewModal";
+import { cardMotion, premiumEase } from "@/lib/animations";
+import { cn } from "@/lib/utils";
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({ product, view = "grid" }: { product: Product; view?: "grid" | "list" }) {
   const { addItem } = useCart();
   const { push } = useToast();
   const [quick, setQuick] = useState(false);
@@ -43,12 +45,21 @@ export function ProductCard({ product }: { product: Product }) {
     <>
       <motion.article
         layout
-        whileHover={{ y: -7 }}
-        transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
-        className="group overflow-hidden border border-black/10 bg-white/62"
+        variants={cardMotion}
+        initial="hidden"
+        animate="show"
+        exit="exit"
+        whileHover={{ y: -9, boxShadow: "0 30px 90px rgba(0,0,0,0.14)" }}
+        transition={{ duration: 0.34, ease: premiumEase }}
+        className={cn(
+          "group overflow-hidden border border-black/10 bg-white/62",
+          view === "list" && "sm:grid sm:grid-cols-[260px_1fr]"
+        )}
       >
-        <Link href={`/products/${product.slug}`} aria-label={product.name}>
-          <ProductImage product={product} className="aspect-[4/5]" />
+        <Link href={`/products/${product.slug}`} aria-label={product.name} className="block overflow-hidden">
+          <motion.div className="h-full" whileHover={{ scale: 1.045 }} transition={{ duration: 0.55, ease: premiumEase }}>
+            <ProductImage product={product} className={view === "list" ? "aspect-[4/3] h-full sm:aspect-auto" : "aspect-[4/5]"} />
+          </motion.div>
         </Link>
         <div className="p-4">
           <div className="mb-3 flex items-center justify-between gap-3">
@@ -73,24 +84,32 @@ export function ProductCard({ product }: { product: Product }) {
               </p>
             </div>
             <div className="flex gap-2">
-              <button
+              <motion.button
                 type="button"
                 onClick={toggleWish}
                 aria-label="Toggle wishlist"
+                whileHover={{ scale: 1.08, rotate: wished ? -6 : 6 }}
+                whileTap={{ scale: 0.86 }}
                 className="grid h-10 w-10 place-items-center rounded-full border border-black/10 bg-bone transition hover:bg-white"
               >
-                <Heart className={wished ? "h-4 w-4 fill-ink" : "h-4 w-4"} />
-              </button>
-              <button
+                <motion.span animate={wished ? { scale: [1, 1.35, 1] } : { scale: 1 }} transition={{ duration: 0.35 }}>
+                  <Heart className={wished ? "h-4 w-4 fill-ink" : "h-4 w-4"} />
+                </motion.span>
+              </motion.button>
+              <motion.button
                 type="button"
                 onClick={() => setQuick(true)}
                 aria-label="Quick view"
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.9 }}
                 className="grid h-10 w-10 place-items-center rounded-full border border-black/10 bg-bone transition hover:bg-white"
               >
                 <Eye className="h-4 w-4" />
-              </button>
+              </motion.button>
               <motion.button
-                whileTap={{ scale: 0.9 }}
+                initial={{ opacity: 0.82, y: 0 }}
+                whileHover={{ scale: 1.08, y: -2 }}
+                whileTap={{ scale: 0.88 }}
                 type="button"
                 onClick={add}
                 aria-label="Add to cart"

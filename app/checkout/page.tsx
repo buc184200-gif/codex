@@ -5,12 +5,14 @@ import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { Button } from "@/components/Button";
+import { CountUpMoney, PageTransition } from "@/components/Motion";
 import { money, orderId } from "@/lib/utils";
 import { useCart } from "@/store/cart-store";
 import { useOrders } from "@/store/order-store";
 import { useProducts } from "@/store/product-store";
 import { useToast } from "@/store/toast-store";
 import { Customer } from "@/types";
+import { fadeUp, premiumEase, staggerContainer } from "@/lib/animations";
 
 const emptyCustomer: Customer = {
   name: "",
@@ -87,20 +89,20 @@ export default function CheckoutPage() {
   };
 
   return (
-    <section className="container-pad py-12">
-      <h1 className="font-display text-5xl">Checkout</h1>
+    <PageTransition className="container-pad py-12">
+      <motion.h1 variants={fadeUp} initial="hidden" animate="show" className="font-display text-5xl">Checkout</motion.h1>
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
         <motion.form
           onSubmit={submit}
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
+          variants={staggerContainer}
+          initial="hidden"
+          animate="show"
           className="border border-black/10 bg-white/60 p-5 md:p-8"
         >
-          <div className="mb-8 flex items-center gap-3">
+          <motion.div variants={fadeUp} className="mb-8 flex items-center gap-3">
             <span className="grid h-10 w-10 place-items-center rounded-full bg-ink text-bone">1</span>
             <h2 className="font-display text-3xl">Delivery details</h2>
-          </div>
+          </motion.div>
           <div className="grid gap-5 md:grid-cols-2">
             <Field label="Name" value={customer.name} onChange={(value) => setField("name", value)} error={errors.name} />
             <Field label="Email" type="email" value={customer.email} onChange={(value) => setField("email", value)} error={errors.email} />
@@ -110,7 +112,7 @@ export default function CheckoutPage() {
             <Field label="State" value={customer.state} onChange={(value) => setField("state", value)} error={errors.state} />
             <Field label="Address" value={customer.address} onChange={(value) => setField("address", value)} error={errors.address} wide />
           </div>
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18, duration: 0.4 }} className="mt-8 border border-black/10 bg-bone p-5">
+          <motion.div variants={fadeUp} whileHover={{ y: -3 }} transition={{ duration: 0.3, ease: premiumEase }} className="mt-8 border border-black/10 bg-bone p-5">
             <div className="flex items-center gap-3">
               <CheckCircle2 className="h-5 w-5 text-gilt" />
               <h2 className="font-display text-2xl">Payment</h2>
@@ -121,7 +123,7 @@ export default function CheckoutPage() {
             {loading ? "Placing order..." : "Place COD order"}
           </Button>
         </motion.form>
-        <aside className="h-fit border border-black/10 bg-ink p-6 text-bone lg:sticky lg:top-28">
+        <motion.aside initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12, duration: 0.5, ease: premiumEase }} className="h-fit border border-black/10 bg-ink p-6 text-bone lg:sticky lg:top-28">
           <h2 className="font-display text-3xl">Summary</h2>
           <div className="mt-5 space-y-4">
             {items.map((item) => {
@@ -135,10 +137,10 @@ export default function CheckoutPage() {
             })}
           </div>
           <div className="mt-6 flex justify-between border-t border-white/10 pt-5 text-sm text-bone/72"><span>Shipping</span><span>{shipping === 0 ? "Free" : money(shipping)}</span></div>
-          <div className="mt-5 flex justify-between text-xl"><span>Total</span><span>{money(total)}</span></div>
-        </aside>
+          <div className="mt-5 flex justify-between text-xl"><span>Total</span><CountUpMoney value={total} /></div>
+        </motion.aside>
       </div>
-    </section>
+    </PageTransition>
   );
 }
 
@@ -146,7 +148,14 @@ function Field({ label, value, onChange, error, type = "text", wide = false }: {
   return (
     <label className={wide ? "md:col-span-2" : ""}>
       <span className="text-sm text-smoke">{label}</span>
-      <input type={type} value={value} onChange={(event) => onChange(event.target.value)} className="focus-ring mt-2 h-12 w-full rounded-full border border-black/10 bg-white/75 px-4" />
+      <motion.input
+        type={type}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        whileFocus={{ scale: 1.012, boxShadow: "0 0 0 3px rgba(169,135,69,0.18)" }}
+        transition={{ duration: 0.2 }}
+        className="focus-ring mt-2 h-12 w-full rounded-full border border-black/10 bg-white/75 px-4"
+      />
       {error && <span className="mt-1 block text-xs text-red-700">{error}</span>}
     </label>
   );

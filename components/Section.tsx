@@ -2,6 +2,7 @@
 
 import { ReactNode } from "react";
 import { motion } from "framer-motion";
+import { fadeUp, premiumEase } from "@/lib/animations";
 
 export function Section({
   eyebrow,
@@ -18,10 +19,11 @@ export function Section({
     <section className={dark ? "bg-ink py-20 text-bone" : "py-20"}>
       <motion.div
         className="container-pad"
-        initial={{ opacity: 0, y: 28 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="show"
         viewport={{ once: true, margin: "-80px" }}
-        transition={{ duration: 0.62, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.62, ease: premiumEase }}
       >
         {eyebrow && <p className={dark ? "mb-3 text-sm text-sand" : "mb-3 text-sm text-gilt"}>{eyebrow}</p>}
         <h2 className="font-display text-4xl md:text-5xl">{title}</h2>

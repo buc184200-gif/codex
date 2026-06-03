@@ -3,13 +3,15 @@
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Minus, Plus, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import { Button } from "@/components/Button";
 import { ProductImage } from "@/components/ProductImage";
 import { money } from "@/lib/utils";
 import { useCart } from "@/store/cart-store";
 import { useProducts } from "@/store/product-store";
 import { useToast } from "@/store/toast-store";
+import { CountUpMoney, PageTransition } from "@/components/Motion";
+import { fadeUp, premiumEase } from "@/lib/animations";
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem } = useCart();
@@ -38,16 +40,16 @@ export default function CartPage() {
   };
 
   return (
-    <section className="container-pad py-12">
-      <h1 className="font-display text-5xl">Cart</h1>
+    <PageTransition className="container-pad py-12">
+      <motion.h1 variants={fadeUp} initial="hidden" animate="show" className="font-display text-5xl">Cart</motion.h1>
       {items.length === 0 ? (
-        <div className="mt-8 grid min-h-80 place-items-center border border-black/10 bg-white/54 p-8 text-center">
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="mt-8 grid min-h-80 place-items-center border border-black/10 bg-white/54 p-8 text-center">
           <div>
             <h2 className="font-display text-4xl">Your cart is empty</h2>
             <p className="mt-3 text-sm text-smoke">Add premium essentials to begin your order.</p>
             <Link href="/products" className="mt-6 inline-flex"><Button>Shop collection</Button></Link>
           </div>
-        </div>
+        </motion.div>
       ) : (
         <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
           <div className="space-y-4">
@@ -59,7 +61,7 @@ export default function CartPage() {
                   initial={{ opacity: 0, x: -24 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 24 }}
-                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.35, ease: premiumEase }}
                   className="grid gap-4 border border-black/10 bg-white/60 p-4 sm:grid-cols-[140px_1fr_auto]"
                 >
                   {product ? <ProductImage product={product} className="aspect-square" /> : <div className="grid aspect-square place-items-center bg-linen text-sm">Unavailable</div>}
@@ -79,9 +81,9 @@ export default function CartPage() {
                     </button>
                   </div>
                   <div className="flex h-12 items-center justify-self-start overflow-hidden rounded-full border border-black/10 bg-white/70 sm:justify-self-end">
-                    <button className="grid h-12 w-12 place-items-center" onClick={() => updateQuantity(item.productId, item.size, item.color, item.quantity - 1)}><Minus className="h-4 w-4" /></button>
-                    <span className="w-10 text-center">{item.quantity}</span>
-                    <button className="grid h-12 w-12 place-items-center" onClick={() => updateQuantity(item.productId, item.size, item.color, item.quantity + 1)}><Plus className="h-4 w-4" /></button>
+                    <motion.button whileTap={{ scale: 0.88 }} className="grid h-12 w-12 place-items-center" onClick={() => updateQuantity(item.productId, item.size, item.color, item.quantity - 1)}><Minus className="h-4 w-4" /></motion.button>
+                    <motion.span key={item.quantity} initial={{ y: -8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-10 text-center">{item.quantity}</motion.span>
+                    <motion.button whileTap={{ scale: 0.88 }} className="grid h-12 w-12 place-items-center" onClick={() => updateQuantity(item.productId, item.size, item.color, item.quantity + 1)}><Plus className="h-4 w-4" /></motion.button>
                   </div>
                 </motion.div>
               ))}
@@ -93,22 +95,22 @@ export default function CartPage() {
               <input value={coupon} onChange={(event) => setCoupon(event.target.value)} placeholder="NOIR10" className="focus-ring h-12 min-w-0 flex-1 rounded-full border border-white/10 bg-white/10 px-4 text-bone placeholder:text-bone/45" />
               <button onClick={applyCoupon} className="h-12 rounded-full bg-bone px-5 text-sm text-ink">Apply</button>
             </div>
-            <SummaryRow label="Subtotal" value={money(subtotal)} />
-            <SummaryRow label="Discount" value={`-${money(discount)}`} />
+            <SummaryRow label="Subtotal" value={<CountUpMoney value={subtotal} />} />
+            <SummaryRow label="Discount" value={<span>-<CountUpMoney value={discount} /></span>} />
             <SummaryRow label="Shipping" value={shipping === 0 ? "Free" : money(shipping)} />
             <div className="mt-5 flex justify-between border-t border-white/10 pt-5 text-lg">
               <span>Total</span>
-              <span>{money(total)}</span>
+              <CountUpMoney value={total} />
             </div>
             <Link href="/checkout" className="mt-6 flex"><Button variant="light" className="w-full">Proceed to checkout</Button></Link>
           </aside>
         </div>
       )}
-    </section>
+    </PageTransition>
   );
 }
 
-function SummaryRow({ label, value }: { label: string; value: string }) {
+function SummaryRow({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="mt-5 flex justify-between text-sm text-bone/72">
       <span>{label}</span>

@@ -2,6 +2,7 @@
 
 import { HTMLMotionProps, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { premiumEase } from "@/lib/animations";
 
 type Props = HTMLMotionProps<"button"> & {
   variant?: "dark" | "light" | "outline";
@@ -10,9 +11,9 @@ type Props = HTMLMotionProps<"button"> & {
 export function Button({ className, variant = "dark", children, ...props }: Props) {
   return (
     <motion.button
-      whileHover={{ y: -2, boxShadow: variant === "dark" ? "0 0 32px rgba(199,170,115,0.24)" : undefined }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -3, scale: 1.015, boxShadow: variant === "dark" ? "0 0 36px rgba(199,170,115,0.28)" : "0 18px 42px rgba(0,0,0,0.12)" }}
+      whileTap={{ scale: 0.965 }}
+      transition={{ duration: 0.24, ease: premiumEase }}
       className={cn(
         "focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 text-sm transition disabled:cursor-not-allowed disabled:opacity-50",
         variant === "dark" && "bg-ink text-bone hover:bg-coal",

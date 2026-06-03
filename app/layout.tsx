@@ -3,6 +3,7 @@ import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
+import { SpotlightCursor } from "@/components/Motion";
 
 export const metadata: Metadata = {
   title: {
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <Providers>
+          <SpotlightCursor />
           <Navbar />
           <main>{children}</main>
           <Footer />
