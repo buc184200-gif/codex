@@ -3,15 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, Search, ShoppingBag, UserCog, X } from "lucide-react";
+import { Menu, Search, ShoppingBag, X } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "@/store/cart-store";
 import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/", label: "Home" },
-  { href: "/products", label: "Shop" },
-  { href: "/admin", label: "Admin" }
+  { href: "/products", label: "Shop" }
 ];
 
 export function Navbar() {
@@ -46,13 +45,6 @@ export function Navbar() {
             className="focus-ring grid h-11 w-11 place-items-center rounded-full border border-black/10 bg-white/60 transition hover:bg-white"
           >
             <Search className="h-5 w-5" />
-          </Link>
-          <Link
-            href="/admin"
-            aria-label="Admin dashboard"
-            className="focus-ring hidden h-11 w-11 place-items-center rounded-full border border-black/10 bg-white/60 transition hover:bg-white sm:grid"
-          >
-            <UserCog className="h-5 w-5" />
           </Link>
           <Link
             href="/cart"
