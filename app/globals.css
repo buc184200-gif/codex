@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f7f3eb;
+  --foreground: #090909;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--foreground);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(199, 170, 115, 0.16), transparent 34rem),
+    linear-gradient(180deg, #fbf8f1 0%, #f3ecdf 42%, #f8f5ef 100%);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: 0;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  color: #f7f3eb;
+  background: #090909;
+}
+
+.container-pad {
+  width: min(1180px, calc(100% - 32px));
+  margin-inline: auto;
+}
+
+.focus-ring {
+  outline: none;
+}
+
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 3px rgba(169, 135, 69, 0.38);
+}
+
+.product-mockup {
+  filter: drop-shadow(0 24px 34px rgba(0, 0, 0, 0.24));
+}
+
+.shirt-shape {
+  clip-path: polygon(26% 13%, 37% 6%, 45% 13%, 55% 13%, 63% 6%, 74% 13%, 95% 30%, 84% 47%, 75% 40%, 75% 92%, 25% 92%, 25% 40%, 16% 47%, 5% 30%);
+}
+
+.overshirt-shape {
+  clip-path: polygon(24% 10%, 42% 4%, 49% 14%, 56% 4%, 76% 10%, 92% 29%, 83% 48%, 74% 42%, 78% 93%, 22% 93%, 26% 42%, 17% 48%, 8% 29%);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
